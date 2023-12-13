@@ -122,7 +122,6 @@ class Uploader(object):
                 response = self.post(target=target, data=post_data_formated)
                 match(response.status):
                     case 200:
-                        print(response.data)
                         new_log = self.history
                         new_log['last_index'] = self.history['last_index'] + 1
                         self.set_log(new_log)
