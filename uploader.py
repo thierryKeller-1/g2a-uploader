@@ -10,13 +10,13 @@ import sys
 import time
 
 
-def create_tag(website) -> str:
+def create_tag(website:str) -> str:
     return f"{website}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
 
 def remove_char(char:object):
     return str(char).replace(',', '-').replace('&', ' and ')
 
-def format_data(data:list, tag:str) -> object:
+def format_data(data:list, website:str) -> object:
     formated_data = ""
     columns = [
         'web-scraper-order',
@@ -50,7 +50,7 @@ def format_data(data:list, tag:str) -> object:
         else:
             result += ","
 
-        result += tag
+        result += create_tag(website)
 
         if len(result.split(',')) == 16:
             formated_data += f"{result};"
@@ -68,10 +68,10 @@ class Uploader(object):
     load_dotenv()
 
     def __init__(self, website:str, freq:int, filename:str) -> None:
-        self.wesite = website 
+        self.website = website 
         self.freq = freq 
         self.filename = filename
-        self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{filename}.csv", low_memory=False)
+        self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{filename}.csv")
 
     def create_log(self) -> None:
         print('==> creating log file')
@@ -103,7 +103,7 @@ class Uploader(object):
             },
             fields={
                 "nights": self.freq,
-                "website_name": self.wesite,
+                "website_name": self.website,
                 "data_content": data
             }
         )
@@ -118,7 +118,7 @@ class Uploader(object):
             new_data = self.data_source.iloc[x].fillna('').to_dict()
             post_data.append(new_data)
             if index == 10 or x >= len(self.data_source):
-                post_data_formated = format_data(post_data, create_tag(self.wesite))
+                post_data_formated = format_data(post_data, self.website)
                 response = self.post(target=target, data=post_data_formated)
                 match(response.status):
                     case 200:
