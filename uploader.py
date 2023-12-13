@@ -71,7 +71,7 @@ class Uploader(object):
         self.wesite = website 
         self.freq = freq 
         self.filename = filename
-        self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{filename}.csv")
+        self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{filename}.csv", low_memory=False)
 
     def create_log(self) -> None:
         print('==> creating log file')
