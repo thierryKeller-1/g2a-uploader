@@ -123,7 +123,7 @@ class Uploader(object):
                 match(response.status):
                     case 200:
                         new_log = self.history
-                        new_log['last_index'] = self.history['last_index'] + 1
+                        new_log['last_index'] = self.history['last_index'] + index
                         self.set_log(new_log)
                     case _:
                         with open('post_bugs.json', 'a') as openfile:
