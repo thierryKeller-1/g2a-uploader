@@ -1,0 +1,12 @@
+1693649134-1,05/02/2024,05/02/2024,06/02/2024,175,175,Chambre Quadruple,,Hôtel le Christiania,Arêches,,6,,,,booking-20240219145615185199;
+1693649134-2,05/02/2024,05/02/2024,06/02/2024,150,120,Chambre Double - Vue sur Montagne,,Hôtel de la Roche,Beaufort,,6,,,,booking-20240219145615185199;
+1693649134-3,05/02/2024,05/02/2024,06/02/2024,127,127,Chambre Triple Confort avec Douche,,Hôtel du Grand-Mont,Beaufort,,6,,,,booking-20240219145615185199;
+1693649134-4,05/02/2024,05/02/2024,06/02/2024,141,141,Chambre Triple (3 Adultes),,Hôtel Viallet,Arêches,,6,,,,booking-20240219145615185199;
+1693649134-5,05/02/2024,05/02/2024,06/02/2024,221,221,Chambre Double Supérieure,,Chalet Hôtel du Mont-Charvin  and  Spa,Crest-Voland,,6,,,,booking-20240219145615185199;
+1693649134-6,05/02/2024,05/02/2024,06/02/2024,115,115,Chambre Double,,Chalet Hotel Le Mont Bisanne,Crest-Voland,,6,,,,booking-20240219145615185199;
+1693649134-7,05/02/2024,05/02/2024,06/02/2024,102,102,Chambre Double - Vue sur Montagne,,Hotel Le Tetras,Notre-Dame-de-Bellecombe,,6,,,,booking-20240219145615185199;
+1693649134-8,05/02/2024,05/02/2024,06/02/2024,636,636,Chambre Double Confort,,Coeur de Megève,Megève,,6,,,,booking-20240219145615185199;
+1693649134-9,05/02/2024,05/02/2024,06/02/2024,261,261,Chambre Double ou Lits Jumeaux,,Hôtel La Grange d'Arly,Megève,,6,,,,booking-20240219145615185199;
+1693649134-10,05/02/2024,05/02/2024,06/02/2024,290,290,Chambre Double Supérieure - Dernier Étage,,Au Coin Du Feu,Megève,,6,,,,booking-20240219145615185199;
+1693649134-11,05/02/2024,05/02/2024,06/02/2024,181,181,Chambre Quadruple Standard,,Hôtel Vacances Bleues Les Chalets du Prariand,Megève,,6,,,,booking-20240219145615185199;
+1693649134-12,05/02/2024,05/02/2024,06/02/2024,1026,720,Chambre Double Classique,,L'Alpaga- a Beaumier hotel,Megève,,6,,,,booking-20240219145615185199;
