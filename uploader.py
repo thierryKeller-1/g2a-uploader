@@ -1,7 +1,7 @@
 import pandas as pd
+import urllib3
 from pathlib import Path
 from datetime import datetime
-from urllib3 import request
 from dotenv import load_dotenv
 from random import randint
 import json
@@ -97,7 +97,7 @@ class Uploader(object):
         print(f"last log {self.history}")
 
     def post(self, target:str, data:str) -> bool:
-        response = request(
+        response = urllib3.request(
             method="POST",
             url= os.environ.get("DEV_ENDPOINT") if target == 'dev' else os.environ.get("PROD_ENDPOINT"),
             headers = {
