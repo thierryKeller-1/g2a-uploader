@@ -122,7 +122,7 @@ class Uploader(object):
             new_data = self.data_source.iloc[x].fillna('').to_dict()
             post_data.append(new_data)
             post_data_formated = format_data(post_data, self.website)
-            if index == 50 or x >= len(self.data_source):
+            if index == 30 or x >= len(self.data_source):
                 response = self.post(target=target, data=post_data_formated)
                 match(response.status):
                     case 200:
