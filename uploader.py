@@ -97,7 +97,8 @@ class Uploader(object):
         print(f"last log {self.history}")
 
     def post(self, target:str, data:str) -> bool:
-        response = urllib3.request(
+        http = urllib3.PoolManager()
+        response = http.request(
             method="POST",
             url= os.environ.get("DEV_ENDPOINT") if target == 'dev' else os.environ.get("PROD_ENDPOINT"),
             headers = {
