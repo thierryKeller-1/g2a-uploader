@@ -7,13 +7,14 @@ if __name__=="__main__":
 
     print(args)
 
-    miss_args = check_arguments(args, ['-w', '-f', '-n', '-t'])
+    miss_args = check_arguments(args, ['-w', '-f', '-n', '-t', '-d'])
 
     if not len(miss_args):
         u = Uploader(
             website=args.website,
             freq=args.frequency,
-            filename=args.name
+            filename=args.name,
+            date_snapshot=args.snapshotdate
         )
         u.create_log()
         u.load_history()

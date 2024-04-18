@@ -12,6 +12,7 @@ def main_arguments() -> object:
                         default='', help="Le nom du fichier source sans extension")
     parser.add_argument('--target', '-t', dest='target',
                         default='dev', help="API dev ou prod")
+    parser.add_argument('--date-snapshot', '-d', dest='snapshotdate', help="Le samedi de la semaine de scrap")
     return parser.parse_args()
 
 
@@ -19,7 +20,8 @@ ARGS_INFO = {
         '-w': {'long': '--website', 'dest': 'website', "help": "Nom du plateforme source des donnees"},
         '-f': {'long': '--frequency', 'dest': 'frequency', "help": "frequence de nuitee"},
         '-n': {'long': '--name', 'dest': 'name', "help": "Nom du fichier source"},
-        '-t': {'long': '--target', 'dest': 'target', "help": "API a utiliser, dev ou prod"}
+        '-t': {'long': '--target', 'dest': 'target', "help": "API a utiliser, dev ou prod"},
+        '-d': {'long': '--date-snapshot', 'dest': 'snapshotdate', "help": "saturday of week scrap"}
     }
 
 def check_arguments(args, required):
