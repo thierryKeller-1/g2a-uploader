@@ -142,19 +142,19 @@ class Uploader(object):
             if index == 10 or x >= len(self.data_source):
                 post_data_formated = format_data(post_data, self.website)
                 print(post_data_formated)
-                # response = self.post(target=target, data=post_data_formated)
-                # match(response.status):
-                #     case 200:
-                #     case _:
-                #         print(response.data)
-                new_log = self.history
-                new_log['last_index'] = self.history['last_index'] + index
-                self.set_log(new_log)
-                post_data.clear()
-                index = 0
+                response = self.post(target=target, data=post_data_formated)
+                match(response.status):
+                    case 200:
+                        new_log = self.history
+                        new_log['last_index'] = self.history['last_index'] + index
+                        self.set_log(new_log)
+                        post_data.clear()
+                        index = 0
+                    case _:
+                        print(response.data)
             index += 1
         new_log = self.history
         new_log['last_index'] = self.history['last_index'] + index
         self.set_log(new_log)
-        # self.post(target=target, data=post_data_formated)
+        self.post(target=target, data=post_data_formated)
         print("  ==> data uploaded!")
