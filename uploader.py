@@ -32,27 +32,18 @@ def create_tag(website:str) -> str:
     return f"{website}-{datetime.now().strftime('%Y%m%d')}"
 
 def remove_char(char:object):
-    return str(char).replace(',', '-').replace('&', ' and ')
+    return str(char).replace(',', ' - ').replace('&', ' and ')
 
 def format_data(data:list, website:str) -> object:
     global COLUMN_ORDER
     formated_data = ""
 
-    for x in range(len(data)):
+    for x in data:
         result = ""
-
-        for col in COLUMN_ORDER:
-            try:
-                result += f"{remove_char(data[x][col])},"
-            except KeyError:
-                result += ","
-        
-        if 'url' in data[x].keys():
-            url = data[x]['url'].replace('www.campings.com', '').replace('www.maeva.com','').replace('www.booking.com','').replace('&', '$')
-            result += f'{url},'
-        else:
-            result += ","
-
+        result += f"{x['snapshot_date']},{x['date_price']},{x['date_debut']},{x['date_fin']},{x['prix_init']},{x['prix_actuel']},"
+        result += f"{remove_char(x['typologie'])},{x['n_offre'].replace('nan', '')},{remove_char(x['nom'])},{remove_char(x['localite'])},"
+        result += f"{x['date_debut-jour']},{x['Nb semaines']},{x['cle_station']},{remove_char(x['nom_station'])},"
+        result += f"{x['url'].replace('www.campings.com', '').replace('www.maeva.com','').replace('www.booking.com','').replace('&', '$')},"
         result += create_tag(website)
 
         if len(result.split(',')) == 16:
@@ -62,7 +53,6 @@ def format_data(data:list, website:str) -> object:
             with open('uncorrect.json', 'a', encoding='utf-8') as openfile:
                 openfile.write(f"{result};\n")
 
-    print(formated_data)
     return formated_data[:-1]
     
 
@@ -90,6 +80,7 @@ class Uploader(object):
         if not_in:
             for colum in not_in:
                 self.data_source[colum] = ''
+        self.data_source.fillna(value='', inplace=True)
         self.data_source['snapshot_date'] = self.snapshotdate
         self.data_source = self.data_source[COLUMN_ORDER]
 
@@ -142,6 +133,7 @@ class Uploader(object):
         print(' ==> upload start!')
         global COLUMN_ORDER
         if not self.check_snapshotdate():
+            print('date invalid')
             return
 
         index = 0
@@ -149,19 +141,18 @@ class Uploader(object):
         for x in range(self.history['last_index'], len(self.data_source)):
             new_data = self.data_source.iloc[x].fillna('').to_dict()
             post_data.append(new_data)
-            post_data_formated = format_data(post_data, self.website)
             if index == 10 or x >= len(self.data_source):
-                print(post_data_formated)
-                # response = self.post(target=target, data=post_data_formated)
-                # match(response.status):
-                #     case 200:
-                #         new_log = self.history
-                #         new_log['last_index'] = self.history['last_index'] + index
-                #         self.set_log(new_log)
-                #         post_data.clear()
-                #         index = 0
-                #     case _:
-                #         print(response.data)
+                post_data_formated = format_data(post_data, self.website)
+                response = self.post(target=target, data=post_data_formated)
+                match(response.status):
+                    case 200:
+                        new_log = self.history
+                        new_log['last_index'] = self.history['last_index'] + index
+                        self.set_log(new_log)
+                        post_data.clear()
+                        index = 0
+                    case _:
+                        print(response.data)
                 new_log = self.history
                 new_log['last_index'] = self.history['last_index'] + index
                 self.set_log(new_log)
