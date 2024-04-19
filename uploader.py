@@ -24,7 +24,8 @@ COLUMN_ORDER = [
         'date_debut-jour',
         'Nb semaines',
         'cle_station',
-        'nom_station'
+        'nom_station',
+        'url'
     ]
 
 def create_tag(website:str) -> str:
@@ -61,6 +62,7 @@ def format_data(data:list, website:str) -> object:
             with open('uncorrect.json', 'a', encoding='utf-8') as openfile:
                 openfile.write(f"{result};\n")
 
+    print(formated_data)
     return formated_data[:-1]
     
 
@@ -74,13 +76,22 @@ class Uploader(object):
         self.freq = freq 
         self.filename = filename
         self.snapshotdate = date_snapshot
-        self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{filename}.csv", low_memory=False)
+        self.setup_datasource()
 
+    def setup_datasource(self):
+        global COLUMN_ORDER
+        self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{self.filename}.csv", low_memory=False)
         nb_semaines = [int(x) for x in self.data_source['Nb semaines'].to_list()]
         self.data_source['Nb semaines'] = nb_semaines
-
         n_offres = [str(x).replace('.0', '') for x in self.data_source['n_offre'].to_list()]
         self.data_source['n_offre'] = n_offres
+        columns = self.data_source.columns.to_list()
+        not_in = list(set(COLUMN_ORDER).difference(columns))
+        if not_in:
+            for colum in not_in:
+                self.data_source[colum] = ''
+        self.data_source['snapshot_date'] = self.snapshotdate
+        self.data_source = self.data_source[COLUMN_ORDER]
 
     def check_snapshotdate(self) -> bool:
         if datetime.strptime(self.snapshotdate, "%d/%m/%Y").isoweekday() == 6:
@@ -132,29 +143,33 @@ class Uploader(object):
         global COLUMN_ORDER
         if not self.check_snapshotdate():
             return
-        self.data_source['snapshot_date'] = self.snapshotdate
-        self.data_source = self.data_source[COLUMN_ORDER]
+
         index = 0
         post_data = []
         for x in range(self.history['last_index'], len(self.data_source)):
             new_data = self.data_source.iloc[x].fillna('').to_dict()
             post_data.append(new_data)
+            post_data_formated = format_data(post_data, self.website)
             if index == 10 or x >= len(self.data_source):
-                post_data_formated = format_data(post_data, self.website)
                 print(post_data_formated)
-                response = self.post(target=target, data=post_data_formated)
-                match(response.status):
-                    case 200:
-                        new_log = self.history
-                        new_log['last_index'] = self.history['last_index'] + index
-                        self.set_log(new_log)
-                        post_data.clear()
-                        index = 0
-                    case _:
-                        print(response.data)
+                # response = self.post(target=target, data=post_data_formated)
+                # match(response.status):
+                #     case 200:
+                #         new_log = self.history
+                #         new_log['last_index'] = self.history['last_index'] + index
+                #         self.set_log(new_log)
+                #         post_data.clear()
+                #         index = 0
+                #     case _:
+                #         print(response.data)
+                new_log = self.history
+                new_log['last_index'] = self.history['last_index'] + index
+                self.set_log(new_log)
+                post_data.clear()
+                index = 0
             index += 1
         new_log = self.history
         new_log['last_index'] = self.history['last_index'] + index
         self.set_log(new_log)
-        self.post(target=target, data=post_data_formated)
+        # self.post(target=target, data=post_data_formated)
         print("  ==> data uploaded!")
