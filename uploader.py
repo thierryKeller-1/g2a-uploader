@@ -52,7 +52,7 @@ def format_data(data:list, website:str) -> object:
         else:
             with open('uncorrect.json', 'a', encoding='utf-8') as openfile:
                 openfile.write(f"{result};\n")
-
+    print(formated_data[:-1])
     return formated_data[:-1]
     
 
@@ -71,7 +71,7 @@ class Uploader(object):
     def setup_datasource(self):
         global COLUMN_ORDER
         self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{self.filename}.csv", low_memory=False)
-        nb_semaines = [int(x) for x in self.data_source['Nb semaines'].to_list()]
+        nb_semaines = [str(x).replace('.0', '') for x in self.data_source['Nb semaines'].to_list()]
         self.data_source['Nb semaines'] = nb_semaines
         n_offres = [str(x).replace('.0', '') for x in self.data_source['n_offre'].to_list()]
         self.data_source['n_offre'] = n_offres
