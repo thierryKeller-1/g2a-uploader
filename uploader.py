@@ -71,7 +71,7 @@ class Uploader(object):
     def setup_datasource(self):
         global COLUMN_ORDER
         self.data_source = pd.read_csv(f"{os.environ.get('STATIC_FOLDER_PATH')}/{self.filename}.csv", low_memory=False)
-        nb_semaines = [str(x).replace('.0', '') for x in self.data_source['Nb semaines'].to_list()]
+        nb_semaines = [int(x) for x in self.data_source['Nb semaines'].to_list()]
         self.data_source['Nb semaines'] = nb_semaines
         n_offres = [str(x).replace('.0', '') for x in self.data_source['n_offre'].to_list()]
         self.data_source['n_offre'] = n_offres
@@ -162,5 +162,5 @@ class Uploader(object):
         new_log = self.history
         new_log['last_index'] = self.history['last_index'] + index
         self.set_log(new_log)
-        # self.post(target=target, data=post_data_formated)
+        self.post(target=target, data=post_data_formated)
         print("  ==> data uploaded!")
