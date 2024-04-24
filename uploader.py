@@ -61,11 +61,12 @@ class Uploader(object):
 
     load_dotenv()
 
-    def __init__(self, website:str, freq:int, filename:str, date_snapshot:str) -> None:
+    def __init__(self, website:str, freq:int, filename:str, date_snapshot:str, target:str='dev') -> None:
         self.website = website 
         self.freq = freq 
         self.filename = filename
         self.snapshotdate = date_snapshot
+        self.target = target.lower()
         self.setup_datasource()
 
     def setup_datasource(self):
@@ -112,12 +113,12 @@ class Uploader(object):
             self.history = json.loads(openfile.read())
         print(f"last log {self.history}")
         
-    def post(self, target:str, data:str) -> bool:        
+    def post(self, data:str) -> bool:        
         response = request(
             method="POST",
-            url= os.environ.get("DEV_ENDPOINT") if target == 'dev' else os.environ.get("PROD_ENDPOINT"),
+            url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
             headers = {
-                'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
+                'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
             },
             fields={
                 "nights": self.freq,
@@ -129,7 +130,7 @@ class Uploader(object):
         print(response.data)
         return response
     
-    def upload(self, target:str):
+    def upload(self):
         print(' ==> upload start!')
         global COLUMN_ORDER
         if not self.check_snapshotdate():
@@ -143,7 +144,7 @@ class Uploader(object):
             post_data.append(new_data)
             if index == 10 or x >= len(self.data_source):
                 post_data_formated = format_data(post_data, self.website)
-                response = self.post(target=target, data=post_data_formated)
+                response = self.post(data=post_data_formated)
                 match(response.status):
                     case 200:
                         new_log = self.history
