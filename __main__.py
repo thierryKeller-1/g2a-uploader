@@ -23,5 +23,5 @@ if __name__=="__main__":
         )
         u.create_log()
         u.load_history()
-        u.upload(args.target)
+        u.upload()
     
