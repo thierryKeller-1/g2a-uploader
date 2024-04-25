@@ -124,7 +124,8 @@ class Uploader(object):
                 "nights": self.freq,
                 "website_name": self.website,
                 "data_content": data
-            }
+            },
+            timeout=10
         )
         print('  ==> response \n')
         print(response.data)
@@ -163,5 +164,5 @@ class Uploader(object):
         new_log = self.history
         new_log['last_index'] = self.history['last_index'] + index
         self.set_log(new_log)
-        self.post(target=target, data=post_data_formated)
+        self.post(data=post_data_formated)
         print("  ==> data uploaded!")
