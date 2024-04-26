@@ -47,6 +47,10 @@ def format_data(data:list, website:str) -> object:
         result += create_tag(website)
 
         if len(result.split(',')) == 16:
+            if website.lower() == 'camping' or website.lower() == 'campings':
+                result += f"{x['Nb personnes']};"
+            else:
+                result += ','
             formated_data += f"{result};"
         
         else:
@@ -125,7 +129,7 @@ class Uploader(object):
                 "website_name": self.website,
                 "data_content": data
             },
-            timeout=10
+            timeout=30
         )
         print('  ==> response \n')
         print(response.data)
