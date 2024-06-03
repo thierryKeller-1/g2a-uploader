@@ -5,12 +5,15 @@ import sys
 
 required_args = ['website', 'frequency', 'name', 'snapshotdate', 'target']
 website_args = ['booking', 'campings', 'maeva', 'edomizil']
-frequency_args = [1,3,7]
+frequency_args = ['1','3','7']
 
 def validate_args(args:object) -> None:
         global required_args
         args = vars(args)
-        if list(args.keys()) != required_args:
+        arg_params = list(args.keys())
+        arg_params.sort()
+        required_args.sort()
+        if arg_params != required_args:
             message = f"{list(set(args.keys()).difference(required_args))} arguments are missing or incorrect"
             raise UnreconizedParmException(message)
 
@@ -22,7 +25,7 @@ def validate_args(args:object) -> None:
                         raise UnreconizedParmException(f"website should be in {website_args}")
                 case 'frequency':
                     if arg not in frequency_args:
-                        raise UnreconizedParmException(f"frequency should be in {frequency_args}")
+                        raise UnreconizedParmException(f"frequency should be in {frequency_args} not {arg}")
                 case 'name':
                     if arg == '':
                         raise UnreconizedParmException(f"name should be define")

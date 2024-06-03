@@ -16,7 +16,7 @@ COLUMN_ORDER = [
         'prix_actuel',
         'prix_init',
         'n_offre',
-        'Nb_semaines',
+        'Nb semaines',
         'url',
         'import_tag',
         'localite',
@@ -24,7 +24,7 @@ COLUMN_ORDER = [
         'cle_station',
         'nom_station',
         'nom',
-        'Nb_presonnes',
+        'Nb_personnes',
     ]
 
 REQUIRED_COLUMN_ORDER = [
@@ -43,7 +43,7 @@ REQUIRED_COLUMN_ORDER = [
         'region_key',
         'region_name',
         'nom',
-        'Nb_presonnes',
+        'Nb_personnes',
     ]
 
 
@@ -60,22 +60,22 @@ def format_data(data:list) -> object:
 
     for x in data:
         result = {
-            'snapshot_date' : x['snapshot_date'],
-            'date_price' : x['date_price'],
-            'date_debut' : x['date_debut'],
-            'date_fin' : x['date_fin'],
-            'prix_init' : x['prix_init'],
-            'prix_actuel' : x['prix_actuel'],
-            'n_offre' : x['n_offre'].replace('nan', ''),
-            'Nb_semaines' : x['Nb semaines'],
-            'url' : x['url'].replace('www.campings.com', '').replace('www.maeva.com','').replace('www.booking.com','').replace('&', '$'),
-            'import_tag' : x['import_tag'],
-            'localite' : remove_char(x['localite']),
-            'typologie' : remove_char(x['typologie']),
-            'region_key' : x['region_key'],
-            'region_name' : x['region_name'],
-            'nom' : remove_char(x['nom']),
-            'Nb_personnes' : x['Nb_personnes']
+            "snapshot_date" : x["snapshot_date"],
+            "date_price" : x["date_price"],
+            "date_debut" : x["date_debut"],
+            "date_fin" : x["date_fin"],
+            "prix_init" : x["prix_init"],
+            "prix_actuel" : x["prix_actuel"],
+            "n_offre" : x["n_offre"].replace('nan', ''),
+            "Nb_semaines" : x["Nb_semaines"],
+            "url" : x['url'].replace('www.campings.com', '').replace('www.maeva.com','').replace('www.booking.com','').replace('&', '$'),
+            "import_tag" : x["import_tag"],
+            "localite" : remove_char(x["localite"]),
+            "typologie" : remove_char(x["typologie"]),
+            "region_key" : x["region_key"],
+            "region_name" : x["region_name"],
+            "nom" : remove_char(x["nom"]),
+            "Nb_personnes" : x["Nb_personnes"]
         }
         formated_data.append(result)
     return formated_data
@@ -103,10 +103,11 @@ class Uploader(object):
         self.data_source['import_tag'] = create_tag(self.website)
         columns = self.data_source.columns.to_list()
         not_in = list(set(COLUMN_ORDER).difference(columns))
+        print(not_in)
         if not_in:
             for colum in not_in:
                 self.data_source[colum] = ''
-        self.data_source.rename(columns={'cle_station':'region_key', 'nom_station':'region_name', 'Nb semaines':'Nb_semaines'})
+        self.data_source.rename(columns={'cle_station':'region_key', 'nom_station':'region_name', 'Nb semaines':'Nb_semaines'}, inplace=True)
         try:
             nb_semaines = [int(x) for x in self.data_source['Nb_semaines'].to_list()]
             self.data_source['Nb_semaines'] = nb_semaines
@@ -117,6 +118,7 @@ class Uploader(object):
         self.data_source.fillna(value='', inplace=True)
         self.data_source['snapshot_date'] = self.snapshotdate
         self.data_source = self.data_source[REQUIRED_COLUMN_ORDER]
+        print(self.data_source.columns)
 
     def check_snapshotdate(self) -> bool:
         if datetime.strptime(self.snapshotdate, "%d/%m/%Y").isoweekday() == 6:
@@ -146,7 +148,7 @@ class Uploader(object):
             self.history = json.loads(openfile.read())
         print(f"last log {self.history}")
 
-    def get_website_url(website_name:str) -> str:
+    def get_website_url(self, website_name:str) -> str:
         match(website_name.lower()):
             case 'booking':
                 return "https://www.booking.com/"
@@ -164,12 +166,13 @@ class Uploader(object):
  
         data = {
             "nights": self.freq,
+            "website": self.website,
             "website_url": self.get_website_url(self.website),
-            "website_name": self.website,
             "data_content": data
         }
 
-        encoded_data = json.dumps(data).encode("utf-8")
+        encoded_data = json.dumps(data).encode('utf-8')
+        print(encoded_data)
         response = request(
             method="POST",
             url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
@@ -177,7 +180,8 @@ class Uploader(object):
                 'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
             },
             body=encoded_data,
-            timeout=30
+            timeout=30,
+            retries=3
         )
         print('  ==> response \n')
         print(response.data)
@@ -191,8 +195,8 @@ class Uploader(object):
         for x in range(self.history['last_index'], len(self.data_source)):
             new_data = self.data_source.iloc[x].fillna('').to_dict()
             post_data.append(new_data)
-            if index == 15 or x >= len(self.data_source):
-                post_data_formated = format_data(post_data, self.website)
+            if index == 10 or x >= len(self.data_source):
+                post_data_formated = format_data(post_data)
                 response = self.post(data=post_data_formated)
                 match(response.status):
                     case 200:
@@ -203,6 +207,7 @@ class Uploader(object):
                         index = 0
                     case _:
                         print(response.data)
+                        sys.exit()
                 new_log = self.history
                 new_log['last_index'] = self.history['last_index'] + index
                 self.set_log(new_log)
