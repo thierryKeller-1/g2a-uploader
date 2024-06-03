@@ -2,6 +2,12 @@ import argparse
 from datetime import datetime, timedelta
 
 
+class UnreconizedParmException(Exception):
+
+    def __init__(self, message: object) -> None:
+        super().__init__(message)
+        self.value = message
+
 def main_arguments() -> object:
     parser = argparse.ArgumentParser(description="G2A uploader program",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
