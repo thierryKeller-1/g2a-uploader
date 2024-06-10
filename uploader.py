@@ -171,7 +171,7 @@ class Uploader(object):
             "data_content": data
         }
 
-        encoded_data = json.dumps(data).encode('utf-8')
+        encoded_data = json.dumps(data)
         print(encoded_data)
         response = request(
             method="POST",
