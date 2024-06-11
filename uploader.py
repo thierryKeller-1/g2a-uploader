@@ -170,9 +170,9 @@ class Uploader(object):
             "website_url": self.get_website_url(self.website),
             "data_content": data
         }
+        print(data)
 
         encoded_data = json.dumps(data)
-        print(encoded_data)
         response = request(
             method="POST",
             url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
@@ -180,11 +180,14 @@ class Uploader(object):
                 'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
             },
             body=encoded_data,
-            timeout=30,
+            timeout=60,
             retries=3
         )
         print('  ==> response \n')
         print(response.data)
+        if response.status != 200:
+            print(response.status)
+            self.post(data)
         return response
     
     def upload(self):
