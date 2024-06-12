@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
@@ -173,22 +174,20 @@ class Uploader(object):
         print(data)
 
         encoded_data = json.dumps(data)
-        response = request(
-            method="POST",
-            url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
-            headers = {
-                'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
-            },
-            body=encoded_data,
-            timeout=60,
-            retries=3
-        )
-        print('  ==> response \n')
-        print(response.data)
-        if response.status != 200:
-            print(response.status)
+        try:
+            response = request(
+                method="POST",
+                url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
+                headers = {
+                    'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
+                },
+                body=encoded_data,
+                timeout=60,
+                retries=3
+            )
+            return response
+        except:
             self.post(data)
-        return response
     
     def upload(self):
         print(' ==> upload start!')
@@ -200,7 +199,14 @@ class Uploader(object):
             post_data.append(new_data)
             if index == 10 or x >= len(self.data_source):
                 post_data_formated = format_data(post_data)
-                response = self.post(data=post_data_formated)
+                response = ''
+                while True:
+                    response = self.post(data=post_data_formated)
+                    if response and response.status == 200:
+                        break
+                    else:
+                        print('new attemp try')
+
                 match(response.status):
                     case 200:
                         new_log = self.history
