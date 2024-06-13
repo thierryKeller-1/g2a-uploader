@@ -8,6 +8,8 @@ class UnreconizedParmException(Exception):
         super().__init__(message)
         self.value = message
 
+
+
 def main_arguments() -> object:
     parser = argparse.ArgumentParser(description="G2A uploader program",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)

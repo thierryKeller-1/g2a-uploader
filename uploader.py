@@ -2,11 +2,13 @@ import time
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from urllib3 import request
+# from urllib3 import request
+import requests
 from dotenv import load_dotenv
 import json
 import os
 import sys
+import timeit
 
 
 COLUMN_ORDER = [
@@ -104,9 +106,10 @@ class Uploader(object):
         self.data_source['import_tag'] = create_tag(self.website)
         columns = self.data_source.columns.to_list()
         not_in = list(set(COLUMN_ORDER).difference(columns))
-        print(not_in)
+        # print(not_in)
         if not_in:
             for colum in not_in:
+                # self.data_source.assign(colum, '')
                 self.data_source[colum] = ''
         self.data_source.rename(columns={'cle_station':'region_key', 'nom_station':'region_name', 'Nb semaines':'Nb_semaines'}, inplace=True)
         try:
@@ -119,7 +122,7 @@ class Uploader(object):
         self.data_source.fillna(value='', inplace=True)
         self.data_source['snapshot_date'] = self.snapshotdate
         self.data_source = self.data_source[REQUIRED_COLUMN_ORDER]
-        print(self.data_source.columns)
+        # print(self.data_source.columns)
 
     def check_snapshotdate(self) -> bool:
         if datetime.strptime(self.snapshotdate, "%d/%m/%Y").isoweekday() == 6:
@@ -163,7 +166,7 @@ class Uploader(object):
                 print('website name not reconized')
                 sys.exit()
         
-    def post(self, data:str) -> bool:     
+    def post(self, data:str) -> object:     
  
         data = {
             "nights": self.freq,
@@ -171,23 +174,37 @@ class Uploader(object):
             "website_url": self.get_website_url(self.website),
             "data_content": data
         }
-        print(data)
+        # print(data)
 
         encoded_data = json.dumps(data)
         try:
-            response = request(
-                method="POST",
-                url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
-                headers = {
-                    'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
-                },
-                body=encoded_data,
-                timeout=60,
-                retries=3
-            )
+            # response = request(
+            #     method="POST",
+            #     url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
+            #     headers = {
+            #         'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
+            #     },
+            #     body=encoded_data,
+            #     timeout=60,
+            #     retries=3
+            # )
+            response = None
+            while True:
+                print('post')
+                response = requests.post(
+                    url= os.environ.get("DEV_ENDPOINT") if self.target == 'dev' else os.environ.get("PROD_ENDPOINT"),
+                    headers = {
+                        'Authorization': f'Bearer {os.environ.get("G2A_DEV_TOKEN")}' if self.target == 'dev' else f'Bearer {os.environ.get("G2A_PROD_TOKEN")}'
+                    },
+                    data=encoded_data,
+                    timeout=60)
+                if response:
+                    print(f"server response {response.text}")
+                    break
             return response
-        except:
-            self.post(data)
+
+        except KeyboardInterrupt:
+            sys.exit()
     
     def upload(self):
         print(' ==> upload start!')
@@ -199,15 +216,11 @@ class Uploader(object):
             post_data.append(new_data)
             if index == 10 or x >= len(self.data_source):
                 post_data_formated = format_data(post_data)
-                response = ''
-                while True:
-                    response = self.post(data=post_data_formated)
-                    if response and response.status == 200:
-                        break
-                    else:
-                        print('new attemp try')
-
-                match(response.status):
+                start = time.time()
+                response = self.post(data=post_data_formated)
+                end = time.time()
+                print(f"post duration {end - start} s")
+                match(response.status_code):
                     case 200:
                         new_log = self.history
                         new_log['last_index'] = self.history['last_index'] + index
@@ -215,7 +228,7 @@ class Uploader(object):
                         post_data.clear()
                         index = 0
                     case _:
-                        print(response.data)
+                        print(response.text)
                         sys.exit()
                 new_log = self.history
                 new_log['last_index'] = self.history['last_index'] + index
